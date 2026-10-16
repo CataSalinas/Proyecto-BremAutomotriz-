@@ -11,6 +11,7 @@ import com.example.bremautomotriz.ui.screens.DetalleOtScreen
 import com.example.bremautomotriz.ui.screens.HomeScreen
 import com.example.bremautomotriz.ui.screens.LoginScreen
 import com.example.bremautomotriz.ui.screens.NuevaOtScreen
+import com.example.bremautomotriz.data.Sesion
 
 @Composable
 fun AppNavHost() {
@@ -31,6 +32,7 @@ fun AppNavHost() {
                 onBuscar = { navController.navigate(Routes.BUSCAR) },
                 onNuevaOt = { navController.navigate(Routes.NUEVA_OT) },
                 onSalir = {
+                    Sesion.usuario = null
                     navController.navigate(Routes.LOGIN) {
                         popUpTo(Routes.HOME) { inclusive = true }
                     }
