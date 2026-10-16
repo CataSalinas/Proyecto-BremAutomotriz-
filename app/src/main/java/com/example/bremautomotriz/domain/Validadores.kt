@@ -33,4 +33,16 @@ object Validadores {
         valor.length > 500 -> "Máximo 500 caracteres."
         else -> null
     }
+
+    fun descripcionLinea(valor: String): String? = when {
+        valor.isBlank() -> "Ingresa una descripción."
+        valor.length > 100 -> "Máximo 100 caracteres."
+        else -> null
+    }
+
+    fun monto(valor: String): String? {
+        if (valor.isBlank()) return "Ingresa el monto."
+        val numero = valor.toIntOrNull() ?: return "Ingresa un número válido."
+        return if (numero <= 0) "El monto debe ser mayor a 0." else null
+    }
 }

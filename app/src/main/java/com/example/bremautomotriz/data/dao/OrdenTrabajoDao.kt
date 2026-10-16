@@ -32,4 +32,8 @@ interface OrdenTrabajoDao {
             "ORDER BY id DESC"
     )
     fun buscar(texto: String): Flow<List<OrdenTrabajo>>
+
+    @Query("SELECT * FROM ordenes_trabajo WHERE vehiculoId = :vehiculoId AND id != :excluirId ORDER BY id DESC")
+    fun observarHistorial(vehiculoId: Long, excluirId: Long): Flow<List<OrdenTrabajo>>
+
 }
