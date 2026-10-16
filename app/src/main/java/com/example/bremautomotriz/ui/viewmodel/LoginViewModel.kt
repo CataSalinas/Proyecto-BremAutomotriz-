@@ -47,7 +47,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             if (usuario == null) {
                 uiState = uiState.copy(
                     cargando = false,
-                    errorGeneral = "Correo o contraseÃ±a incorrectos."
+                    errorGeneral = "Correo o contraseña incorrectos."
                 )
             } else {
                 Sesion.usuario = usuario
