@@ -8,7 +8,9 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.bremautomotriz.data.AppDatabase
 import com.example.bremautomotriz.data.Sesion
+import com.example.bremautomotriz.data.entity.EvidenciaOt
 import com.example.bremautomotriz.data.entity.LineaOt
+import com.example.bremautomotriz.data.entity.TipoEvidencia
 import com.example.bremautomotriz.domain.CalculadoraMontos
 import com.example.bremautomotriz.domain.LineaCalculo
 import com.example.bremautomotriz.domain.ReglasOt
@@ -56,6 +58,11 @@ class DetalleOtViewModel(application: Application) : AndroidViewModel(applicatio
                         iva = resultado.iva,
                         total = resultado.total
                     )
+                }
+            }
+            launch {
+                db.evidenciaOtDao().observarPorOt(id).collect { lista ->
+                    uiState = uiState.copy(evidencias = lista)
                 }
             }
         }
@@ -124,6 +131,14 @@ class DetalleOtViewModel(application: Application) : AndroidViewModel(applicatio
             if (!ReglasOt.puedeAvanzar(orden.estado, Sesion.usuario?.rol)) return@launch
             db.ordenTrabajoDao().actualizar(orden.copy(estado = siguiente))
             onListo(siguiente)
+        }
+    }
+
+    fun onFotoTomada(ruta: String) {
+        viewModelScope.launch {
+            db.evidenciaOtDao().insertar(
+                EvidenciaOt(otId = otId, tipo = TipoEvidencia.VEHICULO, uri = ruta)
+            )
         }
     }
 
