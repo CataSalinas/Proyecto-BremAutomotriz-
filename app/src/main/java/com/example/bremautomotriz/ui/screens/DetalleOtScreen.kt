@@ -1,5 +1,6 @@
 package com.example.bremautomotriz.ui.screens
 
+import android.content.Intent
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -19,12 +20,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -46,6 +49,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bremautomotriz.data.Fotos
 import com.example.bremautomotriz.data.Sesion
 import com.example.bremautomotriz.domain.ReglasOt
+import com.example.bremautomotriz.domain.ResumenOt
 import com.example.bremautomotriz.domain.Textos
 import com.example.bremautomotriz.domain.TipoLinea
 import com.example.bremautomotriz.ui.components.PantallaBase
@@ -181,6 +185,33 @@ fun DetalleOtScreen(
                             FilaMonto("IVA (19%)", estado.iva)
                             FilaMonto("Total", estado.total, destacado = true)
                         }
+                    }
+                }
+
+                item {
+                    OutlinedButton(
+                        onClick = {
+                            val texto = ResumenOt.texto(
+                                orden,
+                                estado.lineas,
+                                estado.neto,
+                                estado.iva,
+                                estado.total
+                            )
+                            val envio = Intent(Intent.ACTION_SEND).apply {
+                                type = "text/plain"
+                                putExtra(
+                                    Intent.EXTRA_SUBJECT,
+                                    "Orden de trabajo N° ${orden.id} - BREM Automotriz"
+                                )
+                                putExtra(Intent.EXTRA_TEXT, texto)
+                            }
+                            context.startActivity(Intent.createChooser(envio, "Compartir orden"))
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Filled.Share, contentDescription = null)
+                        Text("  Compartir orden")
                     }
                 }
 
