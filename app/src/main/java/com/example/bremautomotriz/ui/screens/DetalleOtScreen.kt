@@ -1,11 +1,15 @@
 package com.example.bremautomotriz.ui.screens
 
 import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,6 +18,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
@@ -24,18 +29,30 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.produceState
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.ImageBitmap
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.bremautomotriz.data.Fotos
 import com.example.bremautomotriz.data.Sesion
 import com.example.bremautomotriz.domain.ReglasOt
 import com.example.bremautomotriz.domain.Textos
 import com.example.bremautomotriz.domain.TipoLinea
 import com.example.bremautomotriz.ui.components.PantallaBase
 import com.example.bremautomotriz.ui.viewmodel.DetalleOtViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.File
 
 @Composable
 fun DetalleOtScreen(
@@ -46,6 +63,20 @@ fun DetalleOtScreen(
     val estado = viewModel.uiState
     val context = LocalContext.current
     val orden = estado.orden
+    var rutaPendiente by rememberSaveable { mutableStateOf<String?>(null) }
+
+    val camara = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { exito ->
+        val ruta = rutaPendiente
+        if (ruta != null) {
+            if (exito) {
+                viewModel.onFotoTomada(ruta)
+                Toast.makeText(context, "Foto agregada a la orden", Toast.LENGTH_SHORT).show()
+            } else {
+                File(ruta).delete()
+            }
+        }
+        rutaPendiente = null
+    }
 
     LaunchedEffect(id) { viewModel.cargar(id) }
 
@@ -209,6 +240,35 @@ fun DetalleOtScreen(
 
                 item {
                     Text(
+                        text = "Fotos del vehículo",
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                }
+
+                item {
+                    Button(
+                        onClick = {
+                            val archivo = Fotos.nuevoArchivo(context, id)
+                            rutaPendiente = archivo.absolutePath
+                            camara.launch(Fotos.uriParaCamara(context, archivo))
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Filled.PhotoCamera, contentDescription = null)
+                        Text("  Tomar foto")
+                    }
+                }
+
+                if (estado.evidencias.isEmpty()) {
+                    item { Text("Aún no hay fotos de esta orden.") }
+                }
+
+                items(estado.evidencias, key = { "e${it.id}" }) { evidencia ->
+                    FotoEvidencia(ruta = evidencia.uri, fecha = evidencia.fecha)
+                }
+
+                item {
+                    Text(
                         text = "Historial del vehículo",
                         style = MaterialTheme.typography.titleMedium
                     )
@@ -244,5 +304,31 @@ private fun FilaMonto(etiqueta: String, valor: Int, destacado: Boolean = false) 
     ) {
         Text(etiqueta, style = estilo)
         Text(Textos.pesos(valor), style = estilo)
+    }
+}
+
+@Composable
+private fun FotoEvidencia(ruta: String, fecha: Long) {
+    val imagen by produceState<ImageBitmap?>(initialValue = null, ruta) {
+        value = withContext(Dispatchers.IO) { Fotos.cargar(ruta)?.asImageBitmap() }
+    }
+
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column {
+            val bitmap = imagen
+            if (bitmap != null) {
+                Image(
+                    bitmap = bitmap,
+                    contentDescription = "Foto del vehículo",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(200.dp),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Text("Cargando foto...", modifier = Modifier.padding(12.dp))
+            }
+            Text(Textos.fecha(fecha), modifier = Modifier.padding(12.dp))
+        }
     }
 }
