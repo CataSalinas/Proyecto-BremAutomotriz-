@@ -57,6 +57,13 @@ import com.example.bremautomotriz.ui.viewmodel.DetalleOtViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
+import com.example.bremautomotriz.data.entity.EstadoOt
 
 @Composable
 fun DetalleOtScreen(
@@ -91,6 +98,16 @@ fun DetalleOtScreen(
             val siguiente = ReglasOt.siguiente(orden.estado)
             val puedeAvanzar = ReglasOt.puedeAvanzar(orden.estado, Sesion.usuario?.rol)
             val editable = ReglasOt.puedeEditarLineas(orden.estado)
+            val colorEstado by animateColorAsState(
+                targetValue = when (orden.estado) {
+                    EstadoOt.PENDIENTE -> MaterialTheme.colorScheme.secondary
+                    EstadoOt.EN_PROCESO -> MaterialTheme.colorScheme.primary
+                    EstadoOt.ANULADA -> MaterialTheme.colorScheme.error
+                    else -> MaterialTheme.colorScheme.tertiary
+                },
+                animationSpec = tween(500),
+                label = "colorEstado"
+            )
 
             LazyColumn(
                 modifier = Modifier.weight(1f),
@@ -102,11 +119,20 @@ fun DetalleOtScreen(
                             modifier = Modifier.padding(12.dp),
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            Text(
-                                text = Textos.estado(orden.estado),
-                                style = MaterialTheme.typography.titleLarge,
-                                color = MaterialTheme.colorScheme.primary
-                            )
+                            AnimatedContent(
+                                targetState = orden.estado,
+                                transitionSpec = {
+                                    fadeIn(animationSpec = tween(300)) togetherWith
+                                        fadeOut(animationSpec = tween(300))
+                                },
+                                label = "estadoOt"
+                            ) { estadoActual ->
+                                Text(
+                                    text = Textos.estado(estadoActual),
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = colorEstado
+                                )
+                            }
                             Text("Patente: ${orden.patente}")
                             Text("Cliente: ${orden.nombreCliente}")
                             Text("Kilometraje: ${orden.kilometraje} km")
