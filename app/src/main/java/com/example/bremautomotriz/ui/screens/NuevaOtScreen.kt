@@ -81,7 +81,7 @@ fun NuevaOtScreen(
                     viewModel.onGuardarClick { id ->
                         Toast.makeText(
                             context,
-                            "Orden de trabajo NÂ° $id creada",
+                            "Orden de trabajo N° $id creada",
                             Toast.LENGTH_SHORT
                         ).show()
                         onVolver()
