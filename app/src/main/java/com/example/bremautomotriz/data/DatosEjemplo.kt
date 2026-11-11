@@ -19,9 +19,6 @@ object DatosEjemplo {
         db.usuarioDao().insertar(
             Usuario(nombre = "Jefe de Taller", email = "jefe@brem.cl", password = "jefe123", rol = Rol.JEFE)
         )
-        db.usuarioDao().insertar(
-            Usuario(nombre = "Developer", email = "dev@brem.cl", password = "dev1234", rol = Rol.DEVELOPER)
-        )
 
         val cliente1 = db.clienteDao().insertar(
             Cliente(nombre = "Cliente Ejemplo Uno", run = "11.111.111-1", telefono = "+56 9 1111 1111", correo = "cliente1@ejemplo.cl")

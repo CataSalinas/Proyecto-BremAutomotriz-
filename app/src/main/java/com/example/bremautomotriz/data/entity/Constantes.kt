@@ -1,7 +1,6 @@
 package com.example.bremautomotriz.data.entity
 
 object Rol {
-    const val DEVELOPER = "DEVELOPER"
     const val ADMIN = "ADMIN"
     const val JEFE = "JEFE"
 }

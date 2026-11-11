@@ -34,7 +34,6 @@ fun HomeScreen(
     val rolTexto = when (usuario?.rol) {
         Rol.ADMIN -> "Administrador"
         Rol.JEFE -> "Jefe de taller"
-        Rol.DEVELOPER -> "Developer"
         else -> ""
     }
 
