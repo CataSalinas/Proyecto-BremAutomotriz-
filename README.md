@@ -34,7 +34,6 @@ Queda para la próxima entrega: administración de usuarios, presupuestos, pagos
 | admin1@brem.cl | admin123 | Administrador |
 | admin2@brem.cl | admin123 | Administrador |
 | jefe@brem.cl | jefe123 | Jefe de taller |
-| dev@brem.cl | dev1234 | Developer |
 
 Patentes de ejemplo para crear órdenes: ABCD12, WXYZ34 y BCDF56.
 
