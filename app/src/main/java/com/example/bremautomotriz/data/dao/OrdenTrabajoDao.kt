@@ -15,6 +15,9 @@ interface OrdenTrabajoDao {
     @Update
     suspend fun actualizar(orden: OrdenTrabajo)
 
+    @Query("DELETE FROM ordenes_trabajo WHERE id = :id")
+    suspend fun eliminar(id: Long)
+
     @Query("SELECT * FROM ordenes_trabajo WHERE id = :id")
     suspend fun buscarPorId(id: Long): OrdenTrabajo?
 
