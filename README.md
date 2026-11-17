@@ -15,7 +15,7 @@ Sección: DESARROLLO DE APLICACIONES MOVILES_012D
 ## Qué hace la app (primera entrega)
 
 - Inicio de sesión con validaciones y mensajes de error
-- Pantalla de inicio según el rol (Administrador, Jefe de taller o Developer)
+- Pantalla de inicio según el rol (Administrador o Jefe de taller)
 - Búsqueda de órdenes por patente, cliente o número de OT
 - Creación de órdenes de trabajo con formulario validado
 - Detalle de la OT: trabajos y repuestos, neto, IVA (19 %) y total

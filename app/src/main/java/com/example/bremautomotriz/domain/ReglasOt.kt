@@ -16,7 +16,7 @@ object ReglasOt {
         if (rol == null) return false
         return when (estado) {
             EstadoOt.PENDIENTE, EstadoOt.LISTO -> true
-            EstadoOt.EN_PROCESO -> rol == Rol.ADMIN || rol == Rol.DEVELOPER
+            EstadoOt.EN_PROCESO -> rol == Rol.ADMIN
             else -> false
         }
     }
