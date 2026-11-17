@@ -17,6 +17,7 @@ import com.example.bremautomotriz.ui.screens.DetalleOtScreen
 import com.example.bremautomotriz.ui.screens.HomeScreen
 import com.example.bremautomotriz.ui.screens.LoginScreen
 import com.example.bremautomotriz.ui.screens.NuevaOtScreen
+import com.example.bremautomotriz.ui.screens.SplashScreen
 
 @Composable
 fun AppNavHost() {
@@ -24,7 +25,7 @@ fun AppNavHost() {
 
     NavHost(
         navController = navController,
-        startDestination = Routes.LOGIN,
+        startDestination = Routes.SPLASH,
         enterTransition = {
             slideInHorizontally(animationSpec = tween(300), initialOffsetX = { it }) +
                 fadeIn(animationSpec = tween(300))
@@ -42,6 +43,15 @@ fun AppNavHost() {
                 fadeOut(animationSpec = tween(300))
         }
     ) {
+        composable(Routes.SPLASH) {
+            SplashScreen(
+                onFin = {
+                    navController.navigate(Routes.LOGIN) {
+                        popUpTo(Routes.SPLASH) { inclusive = true }
+                    }
+                }
+            )
+        }
         composable(Routes.LOGIN) {
             LoginScreen(
                 onEntrar = {

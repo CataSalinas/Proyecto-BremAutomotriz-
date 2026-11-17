@@ -14,6 +14,7 @@ Sección: DESARROLLO DE APLICACIONES MOVILES_012D
 
 ## Qué hace la app (primera entrega)
 
+- Pantalla de splash con el logo de BREM al abrir la app
 - Inicio de sesión con validaciones y mensajes de error
 - Pantalla de inicio según el rol (Administrador o Jefe de taller)
 - Búsqueda de órdenes por patente, cliente o número de OT
