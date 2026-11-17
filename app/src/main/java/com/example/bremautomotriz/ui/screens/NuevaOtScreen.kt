@@ -50,6 +50,60 @@ fun NuevaOtScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            if (estado.vehiculoNuevo) {
+                OutlinedTextField(
+                    value = estado.marca,
+                    onValueChange = viewModel::onMarcaChanged,
+                    label = { Text("Marca") },
+                    isError = estado.marcaError != null,
+                    supportingText = { estado.marcaError?.let { Text(it) } },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = estado.modelo,
+                    onValueChange = viewModel::onModeloChanged,
+                    label = { Text("Modelo") },
+                    isError = estado.modeloError != null,
+                    supportingText = { estado.modeloError?.let { Text(it) } },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = estado.anio,
+                    onValueChange = viewModel::onAnioChanged,
+                    label = { Text("Año") },
+                    isError = estado.anioError != null,
+                    supportingText = { estado.anioError?.let { Text(it) } },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    ),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = estado.nombreCliente,
+                    onValueChange = viewModel::onNombreClienteChanged,
+                    label = { Text("Nombre del cliente") },
+                    isError = estado.nombreClienteError != null,
+                    supportingText = { estado.nombreClienteError?.let { Text(it) } },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = estado.run,
+                    onValueChange = viewModel::onRunChanged,
+                    label = { Text("RUN del cliente (opcional)") },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+
             OutlinedTextField(
                 value = estado.kilometraje,
                 onValueChange = viewModel::onKilometrajeChanged,
