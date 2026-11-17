@@ -23,4 +23,6 @@ object ReglasOt {
 
     fun puedeEditarLineas(estado: String): Boolean =
         estado == EstadoOt.PENDIENTE || estado == EstadoOt.EN_PROCESO
+
+    fun puedeEliminar(rol: String?): Boolean = rol == Rol.ADMIN
 }

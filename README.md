@@ -20,6 +20,7 @@ Sección: DESARROLLO DE APLICACIONES MOVILES_012D
 - Creación de órdenes de trabajo con formulario validado
 - Detalle de la OT: trabajos y repuestos, neto, IVA (19 %) y total
 - Cambio de estado de la OT (Pendiente, En proceso, Listo, Entregado); solo el Administrador puede marcarla como Lista
+- Eliminación de órdenes por el Administrador desde la búsqueda, con confirmación antes de borrar
 - Historial de otras órdenes del mismo vehículo
 - Fotos del vehículo con la cámara
 - Compartir el resumen de la OT con otras apps
