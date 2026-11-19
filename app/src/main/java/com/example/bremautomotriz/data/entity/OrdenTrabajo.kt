@@ -27,7 +27,6 @@ data class OrdenTrabajo(
     val observacionIngreso: String = "",
     val observacionEntrega: String = "",
     val estado: String = EstadoOt.PENDIENTE,
-    val neto: Int = 0,
     val iva: Int = 0,
     val total: Int = 0
 )

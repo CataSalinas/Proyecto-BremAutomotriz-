@@ -54,7 +54,6 @@ class DetalleOtViewModel(application: Application) : AndroidViewModel(applicatio
                     val resultado = calcular(lista)
                     uiState = uiState.copy(
                         lineas = lista,
-                        neto = resultado.neto,
                         iva = resultado.iva,
                         total = resultado.total
                     )
@@ -149,7 +148,7 @@ class DetalleOtViewModel(application: Application) : AndroidViewModel(applicatio
         val orden = db.ordenTrabajoDao().buscarPorId(otId) ?: return
         val resultado = calcular(db.lineaOtDao().listarPorOt(otId))
         db.ordenTrabajoDao().actualizar(
-            orden.copy(neto = resultado.neto, iva = resultado.iva, total = resultado.total)
+            orden.copy(iva = resultado.iva, total = resultado.total)
         )
     }
 }
