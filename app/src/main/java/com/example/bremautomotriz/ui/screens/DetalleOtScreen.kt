@@ -207,7 +207,6 @@ fun DetalleOtScreen(
                             modifier = Modifier.padding(12.dp),
                             verticalArrangement = Arrangement.spacedBy(4.dp)
                         ) {
-                            FilaMonto("Neto", estado.neto)
                             FilaMonto("IVA (19%)", estado.iva)
                             FilaMonto("Total", estado.total, destacado = true)
                         }
@@ -220,7 +219,6 @@ fun DetalleOtScreen(
                             val texto = ResumenOt.texto(
                                 orden,
                                 estado.lineas,
-                                estado.neto,
                                 estado.iva,
                                 estado.total
                             )

@@ -10,7 +10,6 @@ data class DetalleOtModel(
     val lineas: List<LineaOt> = emptyList(),
     val historial: List<OrdenTrabajo> = emptyList(),
     val evidencias: List<EvidenciaOt> = emptyList(),
-    val neto: Int = 0,
     val iva: Int = 0,
     val total: Int = 0,
     val tipo: String = TipoLinea.REPUESTO,

@@ -15,9 +15,8 @@ class CalculadoraMontosTest {
                 LineaCalculo(TipoLinea.INSUMO, 10000)
             )
         )
-        assertEquals(94600, resultado.neto)
+        assertEquals(94600, resultado.total)
         assertEquals(17974, resultado.iva)
-        assertEquals(112574, resultado.total)
         assertEquals(4200, resultado.comisionOmex)
         assertEquals(8400, resultado.comisionRepuestos)
     }
@@ -25,9 +24,8 @@ class CalculadoraMontosTest {
     @Test
     fun sinLineasDaCero() {
         val resultado = CalculadoraMontos.calcular(emptyList())
-        assertEquals(0, resultado.neto)
-        assertEquals(0, resultado.iva)
         assertEquals(0, resultado.total)
+        assertEquals(0, resultado.iva)
     }
 
     @Test
@@ -35,9 +33,8 @@ class CalculadoraMontosTest {
         val resultado = CalculadoraMontos.calcular(
             listOf(LineaCalculo(TipoLinea.OM, 20000))
         )
-        assertEquals(20000, resultado.neto)
+        assertEquals(20000, resultado.total)
         assertEquals(3800, resultado.iva)
-        assertEquals(23800, resultado.total)
     }
 
     @Test
@@ -52,8 +49,20 @@ class CalculadoraMontosTest {
         val resultado = CalculadoraMontos.calcular(
             listOf(LineaCalculo(TipoLinea.REPUESTO, 1001))
         )
-        assertEquals(1301, resultado.neto)
+        assertEquals(1301, resultado.total)
         assertEquals(247, resultado.iva)
-        assertEquals(1548, resultado.total)
+    }
+
+    @Test
+    fun elIvaEsInformativoYNoSeSumaAlTotal() {
+        val resultado = CalculadoraMontos.calcular(
+            listOf(
+                LineaCalculo(TipoLinea.OM, 100000),
+                LineaCalculo(TipoLinea.REPUESTO, 20000)
+            )
+        )
+        // 100000 + (20000 * 1,3) = 126000. El IVA (23940) NO se agrega.
+        assertEquals(126000, resultado.total)
+        assertEquals(23940, resultado.iva)
     }
 }
