@@ -85,17 +85,21 @@ Se usa el primer elemento de `serie` como valor vigente.
 
 ## Tecnologías
 
-Kotlin, Jetpack Compose, Material 3, MVVM, Navigation Compose, Retrofit,
-OkHttp, Gson, DataStore Preferences, Coroutines y Flow, JUnit, MockK, JaCoCo.
-El estado remoto se obtiene y modifica desde la API REST.
+- **Lenguaje y UI**: Kotlin 2.2.10, Jetpack Compose (BOM 2026.02.01), Material 3, Navigation Compose.
+- **Arquitectura**: MVVM, ViewModel, Coroutines/Flow, DataStore Preferences.
+- **Red**: Retrofit 2.11.0, OkHttp 4.12.0, Gson 2.11.0 (cliente REST del taller y cliente separado para mindicador.cl).
+- **Pruebas**: JUnit 4.13.2, MockK 1.13.16, MockWebServer 4.12.0, kotlinx-coroutines-test 1.10.2, JaCoCo 0.8.12.
+- **Build**: AGP 9.4.1, `minSdk 26`, `targetSdk 37`, `compileSdk 37`, Java 11 para compilación (`sourceCompatibility`/`targetCompatibility`).
+
+El estado remoto se obtiene y modifica desde la API REST; no hay base de datos local.
 
 ## Cómo ejecutarla
 
 1. Clonar el repositorio y abrir la carpeta en Android Studio.
-2. Usar JDK 21 y esperar a que termine la sincronización de Gradle. Si el SDK no
-   se detecta automáticamente, crear `local.properties` con `sdk.dir` apuntando
-   al SDK de Android.
-3. Ejecutar en emulador o dispositivo con Android 8.0 o superior (API 26).
+2. Usar un JDK compatible con AGP 9.4.1 (se recomienda JDK 21) y esperar a que termine la sincronización de Gradle. Si el SDK no
+   se detecta automáticamente, crear `local.properties` localmente con `sdk.dir` apuntando
+   al SDK de Android; ese archivo no debe publicarse.
+3. Ejecutar en emulador o dispositivo con Android 8.0 o superior (API 26, `minSdk 26`).
 
 La URL del backend se compila en `BuildConfig.BASE_URL`. El valor por defecto es
 `http://52.6.72.225:9090`. Para apuntar a otro servidor, pasar la propiedad
@@ -115,18 +119,17 @@ backend; este repositorio no incluye cuentas ni contraseñas de prueba.
 
 ### Compilación y firma release
 
-La configuración de firma lee las propiedades desde `keystore.properties`
-(`storeFile`, `storePassword`, `keyAlias`, `keyPassword`), archivo que no debe
-subirse con valores reales a un repositorio público. El keystore generado para
-este proyecto está en `app/signing/brem-release.jks`.
+La configuración de firma release lee propiedades desde `keystore.properties` en la raíz del proyecto
+(`storeFile`, `storePassword`, `keyAlias`, `keyPassword`). Ese archivo debe definirse localmente y no
+debe subirse con valores reales a un repositorio público. El repositorio espera el keystore en
+`app/signing/brem-release.jks` (ruta por defecto si `storeFile` no se define).
 
 ```powershell
 .\gradlew :app:assembleRelease
 ```
 
-El APK firmado se copia además a `app/release/app-release.apk`. La firma se
-verificó con `apksigner verify --print-certs`; el certificado queda identificado
-como `CN=BREM Automotriz, OU=DSY1105, O=Duoc UC, L=Maipu, ST=RM, C=CL`.
+El APK firmado se copia además a `app/release/app-release.apk` mediante la tarea `copiarApkRelease`.
+La firma puede verificarse localmente con `apksigner verify --print-certs` sobre el APK generado.
 
 ![Evidencia del APK firmado y del keystore](docs/evidencia-firma.png)
 
@@ -137,35 +140,32 @@ como `CN=BREM Automotriz, OU=DSY1105, O=Duoc UC, L=Maipu, ST=RM, C=CL`.
 .\gradlew :app:assembleRelease :app:lintDebug :app:jacocoTestReport :app:jacocoTestCoverageVerification
 ```
 
-- `testDebugUnitTest`: 44 pruebas, 44 correctas.
-- `assembleRelease`: correcto, APK firmado y copiado a `app/release`.
-- `lintDebug`: correcto, 0 errores (26 advertencias informativas).
-- `jacocoTestCoverageVerification`: correcto, umbral mínimo del 80 % superado.
+- `testDebugUnitTest`: 44 pruebas unitarias (`@Test`) en `app/src/test` (dominio, repositorios y ViewModels).
+- `jacocoTestCoverageVerification`: la configuración de JaCoCo exige un mínimo del 80 % sobre el bundle medido.
 
-Cobertura real sobre ViewModels, repositorios y dominio (instrucciones JaCoCo):
-
-| Paquete | Cobertura |
-|---|---:|
-| `com.example.bremautomotriz.ui.viewmodel` | 98,8 % (5378/5444) |
-| `com.example.bremautomotriz.data.repository` | 90,6 % (1615/1783) |
-| `com.example.bremautomotriz.domain` | 95,1 % (721/758) |
-| **Global del bundle** | **96,6 % (7714/7985)** |
-
-El reporte HTML está en
+Cobertura (ViewModels, repositorios y dominio): ejecutar `.\gradlew :app:jacocoTestReport` para obtener cifras actuales. El reporte HTML se genera en
 `app/build/reports/jacoco/jacocoTestReport/html/index.html` y el XML en
 `app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml`.
 
 ## Estructura
 
-- `data/remote`: interfaces Retrofit, DTOs, interceptor de autenticación y
-  cliente separado de mindicador.cl.
-- `data/repository`: repositorios del taller, catálogos, autenticación e
-  indicadores; conversión de DTO a modelos de dominio.
-- `domain`: reglas de estados, validaciones, constantes y resumen de la OT.
+- `data/remote`: interfaces Retrofit (`BremApi`, `MindicadorApi`), DTOs, `AuthInterceptor`, `SessionStore`, `NetworkModule` y `ApiResult`.
+- `data/repository`: repositorios de autenticación, catálogos, órdenes e indicadores; mapeo de DTO a modelos de dominio.
+- `data/Fotos.kt`: utilidades para manejo local de fotos.
+- `domain`: reglas de estados (`ReglasOt`), constantes, validaciones, textos y resumen de OT.
 - `model`: modelos usados por la UI.
-- `ui`: pantallas Compose, navegación, componentes y ViewModels.
+- `ui/navigation`: rutas y `NavHost` de Compose.
+- `ui/screens`: pantallas Splash, Login, Home, Buscar, Nueva OT, Detalle OT, Clientes y Vehículos.
+- `ui/viewmodel`: ViewModels de las pantallas.
+- `ui/components` y `ui/theme`: componentes reutilizables y tema Material 3.
 - `BremApplication.kt`: contenedor de dependencias y fábrica de ViewModels.
-- `app/signing` y `app/release`: keystore y APK firmado.
+- `app/signing` y `app/release`: keystore y APK release (artefactos locales/build).
+
+## Limitaciones conocidas
+
+- Las fotos del vehículo se guardan como ruta local en la evidencia; el proyecto no implementa subida de archivos al backend.
+- No hay modo offline ni base de datos local; la app depende de la API REST.
+- No existe eliminación de órdenes ni logout remoto; el cierre de sesión es local (el token se elimina del dispositivo).
 
 ## Trabajo en equipo
 
