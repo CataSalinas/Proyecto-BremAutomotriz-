@@ -87,7 +87,7 @@ Se usa el primer elemento de `serie` como valor vigente.
 
 Kotlin, Jetpack Compose, Material 3, MVVM, Navigation Compose, Retrofit,
 OkHttp, Gson, DataStore Preferences, Coroutines y Flow, JUnit, MockK, JaCoCo.
-No se utiliza Room: el estado remoto se obtiene y modifica desde la API REST.
+El estado remoto se obtiene y modifica desde la API REST.
 
 ## Cómo ejecutarla
 
