@@ -66,4 +66,17 @@ object Validadores {
         valor.length > 255 -> "Máximo 255 caracteres."
         else -> null
     }
+
+    fun texto(valor: String, campo: String): String? = when {
+        valor.isBlank() -> "Ingresa $campo."
+        valor.length > 50 -> "Máximo 50 caracteres."
+        else -> null
+    }
+
+    fun anio(valor: String): String? {
+        if (valor.isBlank()) return "Ingresa el año."
+        val numero = valor.toIntOrNull() ?: return "Ingresa un número válido."
+        val maximo = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR) + 1
+        return if (numero < 1950 || numero > maximo) "El año debe estar entre 1950 y $maximo." else null
+    }
 }
