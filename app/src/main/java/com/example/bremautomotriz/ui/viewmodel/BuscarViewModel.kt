@@ -1,55 +1,59 @@
 package com.example.bremautomotriz.ui.viewmodel
 
-import android.app.Application
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.bremautomotriz.data.AppDatabase
-import com.example.bremautomotriz.data.Fotos
-import com.example.bremautomotriz.data.Sesion
-import com.example.bremautomotriz.data.entity.OrdenTrabajo
-import com.example.bremautomotriz.domain.ReglasOt
-import com.example.bremautomotriz.model.BuscarModel
-import kotlinx.coroutines.ExperimentalCoroutinesApi
+import com.example.bremautomotriz.data.remote.ApiResult
+import com.example.bremautomotriz.data.repository.OrdenRepository
+import com.example.bremautomotriz.model.VistaOrden
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalCoroutinesApi::class)
-class BuscarViewModel(application: Application) : AndroidViewModel(application) {
+data class BuscarUiState(
+    val texto: String = "",
+    val resultados: List<VistaOrden> = emptyList(),
+    val cargando: Boolean = false,
+    val error: String? = null
+)
 
-    private val db = AppDatabase.obtener(application)
-    private val dao = db.ordenTrabajoDao()
-    private val texto = MutableStateFlow("")
+class BuscarViewModel(private val repositorio: OrdenRepository) : ViewModel() {
 
-    var uiState by mutableStateOf(BuscarModel())
-        private set
+    private val _uiState = MutableStateFlow(BuscarUiState())
+    val uiState: StateFlow<BuscarUiState> = _uiState.asStateFlow()
+
+    private var tarea: Job? = null
 
     init {
-        viewModelScope.launch {
-            texto
-                .flatMapLatest { t ->
-                    if (t.isBlank()) dao.listar() else dao.buscar(t.trim())
-                }
-                .collect { lista ->
-                    uiState = uiState.copy(resultados = lista)
-                }
+        buscar("")
+    }
+
+    fun onTextoChanged(valor: String) {
+        _uiState.update { it.copy(texto = valor) }
+        tarea?.cancel()
+        tarea = viewModelScope.launch {
+            delay(300)
+            buscar(valor.trim())
         }
     }
 
-    fun onTextoChanged(nuevo: String) {
-        texto.value = nuevo
-        uiState = uiState.copy(texto = nuevo)
-    }
+    fun reintentar() = buscar(_uiState.value.texto.trim())
 
-    fun onEliminar(orden: OrdenTrabajo, onEliminado: () -> Unit) {
-        if (!ReglasOt.puedeEliminar(Sesion.usuario?.rol)) return
-        viewModelScope.launch {
-            db.evidenciaOtDao().listarPorOt(orden.id).forEach { Fotos.eliminar(it.uri) }
-            dao.eliminar(orden.id)
-            onEliminado()
+    private fun buscar(q: String) {
+        tarea?.cancel()
+        tarea = viewModelScope.launch {
+            _uiState.update { it.copy(cargando = true, error = null) }
+            when (val resultado = repositorio.buscar(q)) {
+                is ApiResult.Ok -> _uiState.update {
+                    it.copy(resultados = resultado.valor, cargando = false)
+                }
+                is ApiResult.Fallo -> _uiState.update {
+                    it.copy(cargando = false, error = resultado.mensaje)
+                }
+            }
         }
     }
 }

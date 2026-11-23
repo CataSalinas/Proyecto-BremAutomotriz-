@@ -4,70 +4,110 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import com.example.bremautomotriz.data.Sesion
-import com.example.bremautomotriz.data.entity.Rol
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.bremautomotriz.BremApplication
+import com.example.bremautomotriz.domain.Rol
+import com.example.bremautomotriz.domain.Textos
+import com.example.bremautomotriz.model.Indicador
 import com.example.bremautomotriz.ui.components.PantallaBase
+import com.example.bremautomotriz.ui.viewmodel.HomeViewModel
 
 @Composable
 fun HomeScreen(
     onBuscar: () -> Unit,
     onNuevaOt: () -> Unit,
+    onClientes: () -> Unit,
+    onVehiculos: () -> Unit,
     onSalir: () -> Unit
 ) {
-    val usuario = Sesion.usuario
-    val rolTexto = when (usuario?.rol) {
-        Rol.ADMIN -> "Administrador"
-        Rol.JEFE -> "Jefe de taller"
-        else -> ""
-    }
+    val contexto = LocalContext.current
+    val factoria = (contexto.applicationContext as BremApplication).contenedor.factoria
+    val viewModel: HomeViewModel = viewModel(factory = factoria)
+    val estado by viewModel.uiState.collectAsState()
+    val usuario by viewModel.usuario.collectAsState()
 
     var visible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { visible = true }
 
     PantallaBase(titulo = "Inicio") {
-        Aparece(visible = visible, retraso = 0) {
-            Text(
-                text = "Hola, ${usuario?.nombre ?: ""}",
-                style = MaterialTheme.typography.headlineSmall
-            )
+        Aparece(visible, 0) {
+            Text("Hola, ${usuario?.nombre.orEmpty()}", style = MaterialTheme.typography.headlineSmall)
         }
-        Aparece(visible = visible, retraso = 100) {
+        Aparece(visible, 100) {
             Text(
-                text = rolTexto,
+                when (usuario?.rol) {
+                    Rol.ADMIN -> "Administrador"
+                    Rol.JEFE -> "Jefe de taller"
+                    else -> ""
+                },
                 style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.primary
             )
         }
-        Aparece(visible = visible, retraso = 200) {
+
+        Aparece(visible, 200) {
+            Indicadores(
+                estado.indicadores?.uf,
+                estado.indicadores?.dolar,
+                estado.cargando,
+                estado.error,
+                viewModel::cargarIndicadores
+            )
+        }
+
+        Aparece(visible, 300) {
             Button(onClick = onBuscar, modifier = Modifier.fillMaxWidth()) {
                 Icon(Icons.Filled.Search, contentDescription = null)
                 Text("  Buscar patente, cliente o N° de OT")
             }
         }
-        Aparece(visible = visible, retraso = 300) {
+        Aparece(visible, 400) {
             Button(onClick = onNuevaOt, modifier = Modifier.fillMaxWidth()) {
                 Icon(Icons.Filled.Add, contentDescription = null)
                 Text("  Nueva orden de trabajo")
             }
         }
-        Aparece(visible = visible, retraso = 400) {
-            OutlinedButton(onClick = onSalir, modifier = Modifier.fillMaxWidth()) {
+        Aparece(visible, 500) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                OutlinedButton(onClick = onClientes, modifier = Modifier.weight(1f)) {
+                    Icon(Icons.Filled.People, contentDescription = null)
+                    Text("  Clientes")
+                }
+                OutlinedButton(onClick = onVehiculos, modifier = Modifier.weight(1f)) {
+                    Icon(Icons.Filled.DirectionsCar, contentDescription = null)
+                    Text("  Vehículos")
+                }
+            }
+        }
+        Aparece(visible, 600) {
+            OutlinedButton(onClick = { viewModel.cerrarSesion(onSalir) }, modifier = Modifier.fillMaxWidth()) {
                 Text("Cerrar sesión")
             }
         }
@@ -75,11 +115,42 @@ fun HomeScreen(
 }
 
 @Composable
-private fun Aparece(
-    visible: Boolean,
-    retraso: Int,
-    contenido: @Composable () -> Unit
+private fun Indicadores(
+    uf: Indicador?,
+    dolar: Indicador?,
+    cargando: Boolean,
+    error: String?,
+    onRecargar: () -> Unit
 ) {
+    Card(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Indicadores (mindicador.cl)", style = MaterialTheme.typography.titleSmall)
+                TextButton(onClick = onRecargar, enabled = !cargando) { Text("Actualizar") }
+            }
+            when {
+                cargando && uf == null -> CircularProgressIndicator()
+                error != null -> {
+                    Text(error, color = MaterialTheme.colorScheme.error)
+                    TextButton(onClick = onRecargar) { Text("Reintentar") }
+                }
+                uf != null && dolar != null -> {
+                    Text("UF: ${Textos.pesos(uf.valor)} · ${Textos.fecha(uf.fecha)}")
+                    Text("Dólar: ${Textos.pesos(dolar.valor)} · ${Textos.fecha(dolar.fecha)}")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun Aparece(visible: Boolean, retraso: Int, contenido: @Composable () -> Unit) {
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn(animationSpec = tween(400, delayMillis = retraso)) +

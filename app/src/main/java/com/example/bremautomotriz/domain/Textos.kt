@@ -1,13 +1,13 @@
 package com.example.bremautomotriz.domain
 
-import com.example.bremautomotriz.data.entity.EstadoOt
 import java.text.NumberFormat
-import java.text.SimpleDateFormat
-import java.util.Date
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 import java.util.Locale
 
 object Textos {
     private val local = Locale.forLanguageTag("es-CL")
+    private val formato = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm", local)
 
     fun estado(estado: String): String = when (estado) {
         EstadoOt.PENDIENTE -> "Pendiente"
@@ -26,9 +26,16 @@ object Textos {
         else -> tipo
     }
 
-    fun pesos(valor: Int): String =
-        "\$" + NumberFormat.getIntegerInstance(local).format(valor)
+    fun pesos(valor: Int): String = "$" + NumberFormat.getIntegerInstance(local).format(valor)
 
-    fun fecha(milis: Long): String =
-        SimpleDateFormat("dd-MM-yyyy HH:mm", local).format(Date(milis))
+    fun pesos(valor: Double): String = "$" + NumberFormat.getNumberInstance(local).apply {
+        maximumFractionDigits = 2
+    }.format(valor)
+
+    fun fecha(iso: String?): String = if (iso.isNullOrBlank()) {
+        "-"
+    } else {
+        runCatching { LocalDateTime.parse(iso.substringBefore("Z").take(19)).format(formato) }
+            .getOrDefault(iso)
+    }
 }

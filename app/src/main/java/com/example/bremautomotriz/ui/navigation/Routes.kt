@@ -6,6 +6,8 @@ object Routes {
     const val HOME = "home"
     const val BUSCAR = "buscar"
     const val NUEVA_OT = "nueva_ot"
+    const val CLIENTES = "clientes"
+    const val VEHICULOS = "vehiculos"
     const val DETALLE_OT = "ot/{id}"
 
     fun detalleOt(id: Long) = "ot/$id"

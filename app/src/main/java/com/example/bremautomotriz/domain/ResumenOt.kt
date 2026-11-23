@@ -1,16 +1,11 @@
 package com.example.bremautomotriz.domain
 
-import com.example.bremautomotriz.data.entity.LineaOt
-import com.example.bremautomotriz.data.entity.OrdenTrabajo
+import com.example.bremautomotriz.model.Linea
+import com.example.bremautomotriz.model.Orden
 
 object ResumenOt {
 
-    fun texto(
-        orden: OrdenTrabajo,
-        lineas: List<LineaOt>,
-        iva: Int,
-        total: Int
-    ): String {
+    fun texto(orden: Orden, lineas: List<Linea>, iva: Int, total: Int): String {
         val detalle = if (lineas.isEmpty()) {
             "Sin trabajos ni repuestos registrados."
         } else {
@@ -18,6 +13,7 @@ object ResumenOt {
                 "- ${Textos.tipoLinea(it.tipo)}: ${it.descripcion} (${Textos.pesos(it.cobrado)})"
             }
         }
+        val porcentaje = orden.porcentajeIva?.let { String.format("%,.0f", it) } ?: "19"
 
         return buildString {
             appendLine("BREM Automotriz")
@@ -32,7 +28,7 @@ object ResumenOt {
             appendLine("Detalle:")
             appendLine(detalle)
             appendLine()
-            appendLine("IVA (19%): ${Textos.pesos(iva)}")
+            appendLine("IVA ($porcentaje%): ${Textos.pesos(iva)}")
             append("Total: ${Textos.pesos(total)}")
         }
     }

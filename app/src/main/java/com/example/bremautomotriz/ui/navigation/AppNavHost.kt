@@ -6,22 +6,36 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.bremautomotriz.data.Sesion
+import androidx.compose.ui.platform.LocalContext
+import com.example.bremautomotriz.BremApplication
 import com.example.bremautomotriz.ui.screens.BuscarScreen
+import com.example.bremautomotriz.ui.screens.ClientesScreen
 import com.example.bremautomotriz.ui.screens.DetalleOtScreen
 import com.example.bremautomotriz.ui.screens.HomeScreen
 import com.example.bremautomotriz.ui.screens.LoginScreen
 import com.example.bremautomotriz.ui.screens.NuevaOtScreen
 import com.example.bremautomotriz.ui.screens.SplashScreen
+import com.example.bremautomotriz.ui.screens.VehiculosScreen
 
 @Composable
 fun AppNavHost() {
     val navController = rememberNavController()
+    val contenedor = (LocalContext.current.applicationContext as BremApplication).contenedor
+
+    LaunchedEffect(Unit) {
+        contenedor.eventos.expirado.collect {
+            contenedor.sessionStore.limpiar()
+            navController.navigate(Routes.LOGIN) {
+                popUpTo(0) { inclusive = true }
+            }
+        }
+    }
 
     NavHost(
         navController = navController,
@@ -65,8 +79,9 @@ fun AppNavHost() {
             HomeScreen(
                 onBuscar = { navController.navigate(Routes.BUSCAR) },
                 onNuevaOt = { navController.navigate(Routes.NUEVA_OT) },
+                onClientes = { navController.navigate(Routes.CLIENTES) },
+                onVehiculos = { navController.navigate(Routes.VEHICULOS) },
                 onSalir = {
-                    Sesion.usuario = null
                     navController.navigate(Routes.LOGIN) {
                         popUpTo(Routes.HOME) { inclusive = true }
                     }
@@ -81,6 +96,12 @@ fun AppNavHost() {
         }
         composable(Routes.NUEVA_OT) {
             NuevaOtScreen(onVolver = { navController.popBackStack() })
+        }
+        composable(Routes.CLIENTES) {
+            ClientesScreen(onVolver = { navController.popBackStack() })
+        }
+        composable(Routes.VEHICULOS) {
+            VehiculosScreen(onVolver = { navController.popBackStack() })
         }
         composable(
             route = Routes.DETALLE_OT,
