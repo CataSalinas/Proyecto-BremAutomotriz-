@@ -35,10 +35,6 @@ class HomeViewModel(
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
-    init {
-        cargarIndicadores()
-    }
-
     fun cargarIndicadores() {
         viewModelScope.launch {
             _uiState.update { it.copy(cargando = true, error = null) }
