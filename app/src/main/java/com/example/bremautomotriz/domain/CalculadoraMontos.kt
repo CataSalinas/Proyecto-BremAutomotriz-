@@ -16,9 +16,8 @@ data class LineaCalculo(
 )
 
 data class ResultadoMontos(
-    val neto: Int,
-    val iva: Int,
     val total: Int,
+    val iva: Int,
     val comisionOmex: Int,
     val comisionRepuestos: Int
 )
@@ -40,15 +39,14 @@ object CalculadoraMontos {
             else -> 0
         }
 
-    fun calcularIva(neto: Int): Int = (neto * IVA_PORCENTAJE + 50) / 100
+    // El IVA es solo informativo: el total de la boleta ya viene dado por lo cobrado.
+    fun calcularIva(total: Int): Int = (total * IVA_PORCENTAJE + 50) / 100
 
     fun calcular(lineas: List<LineaCalculo>): ResultadoMontos {
-        val neto = lineas.sumOf { cobrado(it) }
-        val iva = calcularIva(neto)
+        val total = lineas.sumOf { cobrado(it) }
         return ResultadoMontos(
-            neto = neto,
-            iva = iva,
-            total = neto + iva,
+            total = total,
+            iva = calcularIva(total),
             comisionOmex = lineas.filter { it.tipo == TipoLinea.OMEX }.sumOf { comision(it) },
             comisionRepuestos = lineas.filter { it.tipo == TipoLinea.REPUESTO }.sumOf { comision(it) }
         )

@@ -14,12 +14,14 @@ Sección: DESARROLLO DE APLICACIONES MOVILES_012D
 
 ## Qué hace la app (primera entrega)
 
+- Pantalla de splash con el logo de BREM al abrir la app
 - Inicio de sesión con validaciones y mensajes de error
 - Pantalla de inicio según el rol (Administrador o Jefe de taller)
 - Búsqueda de órdenes por patente, cliente o número de OT
 - Creación de órdenes de trabajo con formulario validado
-- Detalle de la OT: trabajos y repuestos, neto, IVA (19 %) y total
+- Detalle de la OT: trabajos y repuestos, total de la boleta e IVA (19 %) calculado solo como dato informativo (no se suma al total)
 - Cambio de estado de la OT (Pendiente, En proceso, Listo, Entregado); solo el Administrador puede marcarla como Lista
+- Eliminación de órdenes por el Administrador desde la búsqueda, con confirmación antes de borrar
 - Historial de otras órdenes del mismo vehículo
 - Fotos del vehículo con la cámara
 - Compartir el resumen de la OT con otras apps

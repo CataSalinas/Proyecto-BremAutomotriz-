@@ -14,6 +14,9 @@ interface EvidenciaOtDao {
     @Query("SELECT * FROM evidencias_ot WHERE otId = :otId ORDER BY fecha")
     fun observarPorOt(otId: Long): Flow<List<EvidenciaOt>>
 
+    @Query("SELECT * FROM evidencias_ot WHERE otId = :otId ORDER BY fecha")
+    suspend fun listarPorOt(otId: Long): List<EvidenciaOt>
+
     @Query("SELECT COUNT(*) FROM evidencias_ot WHERE otId = :otId")
     suspend fun contarPorOt(otId: Long): Int
 }

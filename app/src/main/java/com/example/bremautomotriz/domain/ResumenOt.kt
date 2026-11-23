@@ -8,7 +8,6 @@ object ResumenOt {
     fun texto(
         orden: OrdenTrabajo,
         lineas: List<LineaOt>,
-        neto: Int,
         iva: Int,
         total: Int
     ): String {
@@ -33,7 +32,6 @@ object ResumenOt {
             appendLine("Detalle:")
             appendLine(detalle)
             appendLine()
-            appendLine("Neto: ${Textos.pesos(neto)}")
             appendLine("IVA (19%): ${Textos.pesos(iva)}")
             append("Total: ${Textos.pesos(total)}")
         }

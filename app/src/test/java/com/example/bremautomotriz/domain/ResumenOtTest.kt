@@ -24,22 +24,30 @@ class ResumenOtTest {
 
     @Test
     fun incluyeDatosYTotales() {
-        val texto = ResumenOt.texto(orden, lineas, 86000, 16340, 102340)
+        val texto = ResumenOt.texto(orden, lineas, 14440, 76000)
         assertTrue(texto.contains("Orden de trabajo N° 7"))
         assertTrue(texto.contains("Patente: ABCD12"))
         assertTrue(texto.contains("Filtro (\$26.000)"))
-        assertTrue(texto.contains("Total: \$102.340"))
+        assertTrue(texto.contains("IVA (19%): \$14.440"))
+        assertTrue(texto.contains("Total: \$76.000"))
+    }
+
+    @Test
+    fun elIvaNoSeSumaAlTotal() {
+        val texto = ResumenOt.texto(orden, lineas, 14440, 76000)
+        assertFalse(texto.contains("Neto"))
+        assertFalse(texto.contains("90.440"))
     }
 
     @Test
     fun noMuestraElCostoInterno() {
-        val texto = ResumenOt.texto(orden, lineas, 86000, 16340, 102340)
+        val texto = ResumenOt.texto(orden, lineas, 14440, 76000)
         assertFalse(texto.contains("20.000"))
     }
 
     @Test
     fun sinLineasAvisaQueNoHayDetalle() {
-        val texto = ResumenOt.texto(orden, emptyList(), 0, 0, 0)
+        val texto = ResumenOt.texto(orden, emptyList(), 0, 0)
         assertTrue(texto.contains("Sin trabajos ni repuestos registrados."))
     }
 }

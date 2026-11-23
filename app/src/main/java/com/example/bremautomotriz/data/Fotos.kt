@@ -21,6 +21,10 @@ object Fotos {
     fun uriParaCamara(context: Context, archivo: File): Uri =
         FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", archivo)
 
+    fun eliminar(ruta: String) {
+        runCatching { File(ruta).delete() }
+    }
+
     fun cargar(ruta: String, ladoMaximo: Int = 800): Bitmap? {
         val archivo = File(ruta)
         if (!archivo.exists() || archivo.length() == 0L) return null
