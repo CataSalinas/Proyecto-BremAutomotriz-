@@ -1,9 +1,8 @@
 package com.example.bremautomotriz.domain
 
-import com.example.bremautomotriz.data.entity.EstadoOt
-import com.example.bremautomotriz.data.entity.Rol
-
 object ReglasOt {
+
+    private val finales = setOf(EstadoOt.ENTREGADO, EstadoOt.ANULADA)
 
     fun siguiente(estado: String): String? = when (estado) {
         EstadoOt.PENDIENTE -> EstadoOt.EN_PROCESO
@@ -12,17 +11,13 @@ object ReglasOt {
         else -> null
     }
 
-    fun puedeAvanzar(estado: String, rol: String?): Boolean {
-        if (rol == null) return false
-        return when (estado) {
-            EstadoOt.PENDIENTE, EstadoOt.LISTO -> true
-            EstadoOt.EN_PROCESO -> rol == Rol.ADMIN
-            else -> false
-        }
-    }
+    fun puedeAvanzar(estado: String, rol: String?): Boolean =
+        rol in setOf(Rol.ADMIN, Rol.JEFE) && siguiente(estado) != null
 
-    fun puedeEditarLineas(estado: String): Boolean =
-        estado == EstadoOt.PENDIENTE || estado == EstadoOt.EN_PROCESO
+    fun puedeAnular(estado: String, rol: String?): Boolean =
+        rol in setOf(Rol.ADMIN, Rol.JEFE) && estado !in finales
 
-    fun puedeEliminar(rol: String?): Boolean = rol == Rol.ADMIN
+    fun puedeEditar(estado: String): Boolean = estado !in finales
+
+    fun esFinal(estado: String): Boolean = estado in finales
 }

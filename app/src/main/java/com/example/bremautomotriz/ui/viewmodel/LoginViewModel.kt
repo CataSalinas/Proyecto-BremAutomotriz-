@@ -1,58 +1,57 @@
 package com.example.bremautomotriz.ui.viewmodel
 
-import android.app.Application
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
-import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.bremautomotriz.data.AppDatabase
-import com.example.bremautomotriz.data.DatosEjemplo
-import com.example.bremautomotriz.data.Sesion
-import com.example.bremautomotriz.data.repository.UsuarioRepository
+import com.example.bremautomotriz.data.remote.ApiResult
+import com.example.bremautomotriz.data.repository.AuthRepository
 import com.example.bremautomotriz.domain.Validadores
-import com.example.bremautomotriz.model.LoginModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class LoginViewModel(application: Application) : AndroidViewModel(application) {
+data class LoginUiState(
+    val email: String = "",
+    val password: String = "",
+    val emailError: String? = null,
+    val passwordError: String? = null,
+    val error: String? = null,
+    val cargando: Boolean = false
+)
 
-    private val db = AppDatabase.obtener(application)
-    private val repositorio = UsuarioRepository(db.usuarioDao())
-    private val carga = viewModelScope.launch { DatosEjemplo.cargarSiVacio(db) }
+class LoginViewModel(private val repositorio: AuthRepository) : ViewModel() {
 
-    var uiState by mutableStateOf(LoginModel())
-        private set
+    private val _uiState = MutableStateFlow(LoginUiState())
+    val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
-    fun onEmailChanged(email: String) {
-        uiState = uiState.copy(email = email, emailError = null, errorGeneral = null)
+    fun onEmailChanged(valor: String) = _uiState.update {
+        it.copy(email = valor, emailError = null, error = null)
     }
 
-    fun onPasswordChanged(password: String) {
-        uiState = uiState.copy(password = password, passwordError = null, errorGeneral = null)
+    fun onPasswordChanged(valor: String) = _uiState.update {
+        it.copy(password = valor, passwordError = null, error = null)
     }
 
-    fun onLoginClick(onExito: () -> Unit) {
-        val emailError = Validadores.email(uiState.email)
-        val passwordError = Validadores.password(uiState.password)
-
+    fun iniciarSesion(onExito: () -> Unit) {
+        val estado = _uiState.value
+        val emailError = Validadores.email(estado.email)
+        val passwordError = Validadores.password(estado.password)
         if (emailError != null || passwordError != null) {
-            uiState = uiState.copy(emailError = emailError, passwordError = passwordError)
+            _uiState.update { it.copy(emailError = emailError, passwordError = passwordError) }
             return
         }
 
         viewModelScope.launch {
-            uiState = uiState.copy(cargando = true, errorGeneral = null)
-            carga.join()
-            val usuario = repositorio.iniciarSesion(uiState.email, uiState.password)
-            if (usuario == null) {
-                uiState = uiState.copy(
-                    cargando = false,
-                    errorGeneral = "Correo o contraseña incorrectos."
-                )
-            } else {
-                Sesion.usuario = usuario
-                uiState = uiState.copy(cargando = false)
-                onExito()
+            _uiState.update { it.copy(cargando = true, error = null) }
+            when (val resultado = repositorio.login(estado.email, estado.password)) {
+                is ApiResult.Ok -> {
+                    _uiState.update { it.copy(cargando = false) }
+                    onExito()
+                }
+                is ApiResult.Fallo -> _uiState.update {
+                    it.copy(cargando = false, error = resultado.mensaje)
+                }
             }
         }
     }

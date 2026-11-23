@@ -15,6 +15,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -26,23 +27,20 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.bremautomotriz.BremApplication
 import com.example.bremautomotriz.ui.components.PantallaBase
 import com.example.bremautomotriz.ui.viewmodel.LoginViewModel
 
 @Composable
-fun LoginScreen(
-    onEntrar: () -> Unit,
-    viewModel: LoginViewModel = viewModel()
-) {
-    val estado = viewModel.uiState
-    val context = LocalContext.current
+fun LoginScreen(onEntrar: () -> Unit) {
+    val contexto = LocalContext.current
+    val factoria = (contexto.applicationContext as BremApplication).contenedor.factoria
+    val viewModel: LoginViewModel = viewModel(factory = factoria)
+    val estado by viewModel.uiState.collectAsState()
     var verPassword by remember { mutableStateOf(false) }
 
     PantallaBase(titulo = "BREM Automotriz") {
-        Text(
-            text = "Inicio de sesión",
-            style = MaterialTheme.typography.headlineSmall
-        )
+        Text("Inicio de sesión", style = MaterialTheme.typography.headlineSmall)
 
         OutlinedTextField(
             value = estado.email,
@@ -83,14 +81,12 @@ fun LoginScreen(
             modifier = Modifier.fillMaxWidth()
         )
 
-        estado.errorGeneral?.let {
-            Text(text = it, color = MaterialTheme.colorScheme.error)
-        }
+        estado.error?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
         Button(
             onClick = {
-                viewModel.onLoginClick {
-                    Toast.makeText(context, "Sesión iniciada", Toast.LENGTH_SHORT).show()
+                viewModel.iniciarSesion {
+                    Toast.makeText(contexto, "Sesión iniciada", Toast.LENGTH_SHORT).show()
                     onEntrar()
                 }
             },
