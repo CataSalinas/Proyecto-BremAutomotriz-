@@ -112,12 +112,12 @@ class HomeViewModelTest : MainDispatcherTest() {
     private val auth = mockk<AuthRepository>(relaxed = true)
 
     @Test
-    fun `carga indicadores al iniciar`() = runBlocking {
-        coEvery { indicadores.consultar() } returns ApiResult.Ok(indicadores())
+    fun `no consulta indicadores al iniciar`() = runBlocking {
         val viewModel = HomeViewModel(indicadores, sessionStore, auth)
 
-        assertNotNull(viewModel.uiState.value.indicadores)
+        assertNull(viewModel.uiState.value.indicadores)
         assertFalse(viewModel.uiState.value.cargando)
+        coVerify(exactly = 0) { indicadores.consultar() }
     }
 
     @Test
@@ -127,6 +127,7 @@ class HomeViewModelTest : MainDispatcherTest() {
             ApiResult.Ok(indicadores())
         )
         val viewModel = HomeViewModel(indicadores, sessionStore, auth)
+        viewModel.cargarIndicadores()
         assertEquals("Sin conexión", viewModel.uiState.value.error)
 
         viewModel.cargarIndicadores()

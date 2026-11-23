@@ -5,7 +5,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.icons.Icons
@@ -14,13 +13,10 @@ import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Button
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -34,8 +30,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.bremautomotriz.BremApplication
 import com.example.bremautomotriz.domain.Rol
-import com.example.bremautomotriz.domain.Textos
-import com.example.bremautomotriz.model.Indicador
 import com.example.bremautomotriz.ui.components.PantallaBase
 import com.example.bremautomotriz.ui.viewmodel.HomeViewModel
 
@@ -72,16 +66,6 @@ fun HomeScreen(
             )
         }
 
-        Aparece(visible, 200) {
-            Indicadores(
-                estado.indicadores?.uf,
-                estado.indicadores?.dolar,
-                estado.cargando,
-                estado.error,
-                viewModel::cargarIndicadores
-            )
-        }
-
         Aparece(visible, 300) {
             Button(onClick = onBuscar, modifier = Modifier.fillMaxWidth()) {
                 Icon(Icons.Filled.Search, contentDescription = null)
@@ -109,41 +93,6 @@ fun HomeScreen(
         Aparece(visible, 600) {
             OutlinedButton(onClick = { viewModel.cerrarSesion(onSalir) }, modifier = Modifier.fillMaxWidth()) {
                 Text("Cerrar sesión")
-            }
-        }
-    }
-}
-
-@Composable
-private fun Indicadores(
-    uf: Indicador?,
-    dolar: Indicador?,
-    cargando: Boolean,
-    error: String?,
-    onRecargar: () -> Unit
-) {
-    Card(modifier = Modifier.fillMaxWidth()) {
-        Column(
-            modifier = Modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.spacedBy(4.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Text("Indicadores (mindicador.cl)", style = MaterialTheme.typography.titleSmall)
-                TextButton(onClick = onRecargar, enabled = !cargando) { Text("Actualizar") }
-            }
-            when {
-                cargando && uf == null -> CircularProgressIndicator()
-                error != null -> {
-                    Text(error, color = MaterialTheme.colorScheme.error)
-                    TextButton(onClick = onRecargar) { Text("Reintentar") }
-                }
-                uf != null && dolar != null -> {
-                    Text("UF: ${Textos.pesos(uf.valor)} · ${Textos.fecha(uf.fecha)}")
-                    Text("Dólar: ${Textos.pesos(dolar.valor)} · ${Textos.fecha(dolar.fecha)}")
-                }
             }
         }
     }
