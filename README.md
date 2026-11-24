@@ -8,6 +8,9 @@ taller desplegado en `http://52.6.72.225:9090` y el servicio público de
 indicadores económicos `https://mindicador.cl`. El servidor calcula neto, IVA y
 total de cada orden; la app muestra esos valores, no los recalcula.
 
+Repositorio del backend (microservicios Spring Boot):
+https://github.com/Yulianacalvucura/Proyecto-Backend-BremAutomotriz-
+
 ## Integrantes
 
 - Yuliana Calvucura
@@ -110,15 +113,18 @@ El manifiesto solicita `android.permission.INTERNET` y usa
 para `52.6.72.225` y `10.0.2.2`. No hay configuración global de
 `usesCleartextTraffic`.
 
-Las credenciales de acceso se obtienen del servicio de autenticación del
-backend; este repositorio no incluye cuentas ni contraseñas de prueba.
+Las cuentas de prueba para iniciar sesión están en la sección "Usuarios de
+prueba y datos de ejemplo" del README del repositorio del backend.
 
 ### Compilación y firma release
 
 La configuración de firma lee las propiedades desde `keystore.properties`
-(`storeFile`, `storePassword`, `keyAlias`, `keyPassword`), archivo que no debe
-subirse con valores reales a un repositorio público. El keystore generado para
-este proyecto está en `app/signing/brem-release.jks`.
+(`storeFile`, `storePassword`, `keyAlias`, `keyPassword`). El keystore del
+proyecto está en `app/signing/brem-release.jks`.
+
+La pauta de la evaluación exige entregar el `.jks` y su configuración dentro del
+repositorio, por eso ambos archivos están versionados. Este keystore es solo para
+la evaluación: para la entrega final se generará uno nuevo que no se versionará.
 
 ```powershell
 .\gradlew :app:assembleRelease
@@ -134,24 +140,40 @@ como `CN=BREM Automotriz, OU=DSY1105, O=Duoc UC, L=Maipu, ST=RM, C=CL`.
 
 ```powershell
 .\gradlew :app:testDebugUnitTest
-.\gradlew :app:assembleRelease :app:lintDebug :app:jacocoTestReport :app:jacocoTestCoverageVerification
+.\gradlew :app:jacocoTestReport :app:jacocoTestCoverageVerification
 ```
 
-- `testDebugUnitTest`: 44 pruebas, 44 correctas.
-- `assembleRelease`: correcto, APK firmado y copiado a `app/release`.
-- `lintDebug`: correcto, 0 errores (26 advertencias informativas).
+- `testDebugUnitTest`: 44 pruebas, 0 fallos, 0 omitidas.
 - `jacocoTestCoverageVerification`: correcto, umbral mínimo del 80 % superado.
+
+Pruebas por clase (JUnit y MockK):
+
+| Clase de prueba | Pruebas |
+|---|---:|
+| `RepositoryTest` | 8 |
+| `DomainTest` | 4 |
+| `BuscarViewModelTest` | 2 |
+| `ClientesViewModelTest` | 4 |
+| `DetalleOtViewModelTest` | 8 |
+| `HomeViewModelTest` | 3 |
+| `LoginViewModelTest` | 3 |
+| `NuevaOtViewModelTest` | 7 |
+| `VehiculosViewModelTest` | 5 |
+| **Total** | **44** |
 
 Cobertura real sobre ViewModels, repositorios y dominio (instrucciones JaCoCo):
 
 | Paquete | Cobertura |
 |---|---:|
-| `com.example.bremautomotriz.ui.viewmodel` | 98,8 % (5378/5444) |
-| `com.example.bremautomotriz.data.repository` | 90,6 % (1615/1783) |
-| `com.example.bremautomotriz.domain` | 95,1 % (721/758) |
-| **Global del bundle** | **96,6 % (7714/7985)** |
+| `com.example.bremautomotriz.ui.viewmodel` | 98 % |
+| `com.example.bremautomotriz.data.repository` | 90 % |
+| `com.example.bremautomotriz.domain` | 95 % |
+| **Global del bundle** | **96 % (7.710 de 7.981 instrucciones)** |
 
-El reporte HTML está en
+La cobertura de ramas global es de 73 %. La verificación de la pauta (80 %) se
+aplica sobre instrucciones.
+
+El reporte HTML queda en
 `app/build/reports/jacoco/jacocoTestReport/html/index.html` y el XML en
 `app/build/reports/jacoco/jacocoTestReport/jacocoTestReport.xml`.
 
@@ -169,5 +191,6 @@ El reporte HTML está en
 
 ## Trabajo en equipo
 
-Una rama por tarea, Pull Request revisado por la otra persona y merge a
-`develop`. Las tareas se gestionan en Trello.
+Una rama por tarea, Pull Request revisado por la otra persona hacia `develop`, y
+`develop` se integra a `main` mediante Pull Request. Las tareas se gestionan en
+Trello.
